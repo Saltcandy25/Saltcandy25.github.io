@@ -15,6 +15,25 @@ if (menuToggle && siteNav) {
   });
 }
 
+const gameTabs = document.querySelectorAll('[data-game-select]');
+const gamePanels = document.querySelectorAll('[data-game-panel]');
+
+gameTabs.forEach((tab) => {
+  tab.addEventListener('click', () => {
+    const selectedGame = tab.dataset.gameSelect;
+    gameTabs.forEach((item) => {
+      const selected = item === tab;
+      item.classList.toggle('is-active', selected);
+      item.setAttribute('aria-selected', String(selected));
+    });
+    gamePanels.forEach((panel) => { panel.hidden = panel.dataset.gamePanel !== selectedGame; });
+    const heading = document.querySelector('#games-title');
+    const intro = document.querySelector('.game-intro');
+    if (heading) heading.textContent = selectedGame === 'pong' ? 'Cursor Pong / 02' : 'Worm / 01';
+    if (intro) intro.textContent = selectedGame === 'pong' ? 'Move the paddle. Return the signal.' : 'Survive the machine. Grow the line.';
+  });
+});
+
 if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
   let framePending = false;
   let pointerX = 0;

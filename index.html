@@ -8,6 +8,7 @@
   <link rel="stylesheet" href="styles.css">
   <script src="script.js" defer></script>
   <script src="game.js" defer></script>
+  <script src="pong.js" defer></script>
 </head>
 <body>
   <header class="site-header">
@@ -64,7 +65,11 @@
         <div><p class="section-kicker">04 / GAMES</p><h2 id="games-title">Worm / 01</h2></div>
         <p class="game-intro">Survive the machine. Grow the line.</p>
       </div>
-      <div class="game-shell">
+      <div class="game-switcher" role="tablist" aria-label="게임 선택">
+        <button class="game-tab is-active" type="button" role="tab" aria-selected="true" aria-controls="worm-panel" data-game-select="worm">Worm</button>
+        <button class="game-tab" type="button" role="tab" aria-selected="false" aria-controls="pong-panel" data-game-select="pong">Cursor Pong</button>
+      </div>
+      <div id="worm-panel" class="game-shell" data-game-panel="worm" role="tabpanel">
         <div class="game-toolbar" aria-label="게임 정보">
           <div><span class="stat-label">SCORE</span><strong id="score">000</strong></div>
           <div><span class="stat-label">BEST</span><strong id="high-score">000</strong></div>
@@ -87,6 +92,25 @@
           <button type="button" data-direction="right" aria-label="오른쪽으로 이동">→</button>
         </div>
         <p class="game-help">방향키 또는 WASD로 이동 · P로 일시정지 · 먹이 3개마다 Level이 오르고 이동이 0.01초 빨라집니다.</p>
+      </div>
+      <div id="pong-panel" class="game-shell pong-shell" data-game-panel="pong" role="tabpanel" hidden>
+        <div class="game-toolbar" aria-label="Cursor Pong 게임 정보">
+          <div><span class="stat-label">PLAYER</span><strong id="pong-score">00</strong></div>
+          <div><span class="stat-label">COMPUTER</span><strong id="pong-computer-score">00</strong></div>
+          <div><span class="stat-label">LIFE</span><strong id="pong-life">05</strong></div>
+          <div><span class="stat-label">STATUS</span><strong id="pong-status">READY</strong></div>
+        </div>
+        <div class="pong-board-wrap" id="pong-board-wrap">
+          <canvas id="pong-canvas" width="600" height="360" aria-label="Cursor Pong 게임 보드"></canvas>
+          <div id="pong-message" class="game-message">START TO PLAY CURSOR PONG</div>
+        </div>
+        <div class="game-actions">
+          <button id="pong-start" class="game-button game-button-primary" type="button">Start</button>
+          <button id="pong-pause" class="game-button" type="button" disabled>Pause</button>
+          <button id="pong-restart" class="game-button" type="button">Restart</button>
+        </div>
+        <div class="pong-key-controls" aria-label="Cursor Pong 키보드 조작">Use mouse or touch · Arrow Up/Down or W/S</div>
+        <p class="game-help">공을 놓치면 Life가 1 감소합니다. 먼저 11점을 얻으면 승리합니다.</p>
       </div>
     </section>
 
