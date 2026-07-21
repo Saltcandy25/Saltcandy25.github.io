@@ -11,6 +11,7 @@
   };
   const scoreElement = document.querySelector('#score');
   const highScoreElement = document.querySelector('#high-score');
+  const levelElement = document.querySelector('#level');
   const statusElement = document.querySelector('#game-status');
   const messageElement = document.querySelector('#game-message');
   const startButton = document.querySelector('#start-button');
@@ -24,16 +25,20 @@
   let running = false;
   let paused = false;
   let score = 0;
+  let level = 1;
   let best = Number(localStorage.getItem('worm-best-score') || 0);
-  let startedAt = 0;
+  const baseMoveInterval = 500;
+  const levelSpeedStep = 10;
+  const minimumMoveInterval = 50;
+  const maximumLevel = Math.floor((baseMoveInterval - minimumMoveInterval) / levelSpeedStep) + 1;
   let tickTimer = null;
-  let scoreTimer = null;
   let enemyTimer = null;
   let explosionTimer = null;
   let respawnTimer = null;
   let explosionUntil = 0;
 
   highScoreElement.textContent = formatScore(best);
+  levelElement.textContent = formatScore(level).slice(-2);
 
   function formatScore(value) { return String(value).padStart(3, '0'); }
 
@@ -51,12 +56,19 @@
   }
 
   function clearTimers() {
-    [tickTimer, scoreTimer, enemyTimer, explosionTimer, respawnTimer].forEach((timer) => { if (timer) clearInterval(timer); });
+    [tickTimer, enemyTimer, explosionTimer, respawnTimer].forEach((timer) => { if (timer) clearInterval(timer); });
     if (respawnTimer) clearTimeout(respawnTimer);
-    tickTimer = scoreTimer = enemyTimer = explosionTimer = respawnTimer = null;
+    tickTimer = enemyTimer = explosionTimer = respawnTimer = null;
   }
 
   function setStatus(value) { statusElement.textContent = value; }
+
+  function currentMoveInterval() { return Math.max(minimumMoveInterval, baseMoveInterval - ((level - 1) * levelSpeedStep)); }
+
+  function restartTickTimer() {
+    if (tickTimer) clearInterval(tickTimer);
+    tickTimer = setInterval(tick, currentMoveInterval());
+  }
 
   function startGame() {
     clearTimers();
@@ -67,26 +79,20 @@
     food = randomFreeCell();
     enemy = { ...randomFreeCell(), direction: directions.left, active: true };
     score = 0;
-    startedAt = Date.now();
+    level = 1;
     running = true;
     paused = false;
     explosionUntil = 0;
     scoreElement.textContent = formatScore(score);
+    levelElement.textContent = formatScore(level).slice(-2);
     setStatus('RUNNING');
     messageElement.classList.add('is-hidden');
     pauseButton.disabled = false;
     pauseButton.textContent = 'Pause';
-    tickTimer = setInterval(tick, 110);
-    scoreTimer = setInterval(updateScore, 1000);
+    restartTickTimer();
     enemyTimer = setInterval(moveEnemy, 520);
     explosionTimer = setInterval(explodeEnemy, 4000);
     draw();
-  }
-
-  function updateScore() {
-    if (!running || paused) return;
-    score = Math.floor((Date.now() - startedAt) / 1000);
-    scoreElement.textContent = formatScore(score);
   }
 
   function tick() {
@@ -98,7 +104,16 @@
     const hitEnemy = enemy && enemy.active && head.x === enemy.x && head.y === enemy.y;
     if (hitWall || hitSelf || hitEnemy) { endGame('GAME OVER'); return; }
     worm.unshift(head);
-    if (food && head.x === food.x && head.y === food.y) food = randomFreeCell(); else worm.pop();
+    if (food && head.x === food.x && head.y === food.y) {
+      score += 1;
+      if (score % 3 === 0 && level < maximumLevel) {
+        level += 1;
+        levelElement.textContent = formatScore(level).slice(-2);
+        restartTickTimer();
+      }
+      scoreElement.textContent = formatScore(score);
+      food = randomFreeCell();
+    } else worm.pop();
     draw();
   }
 

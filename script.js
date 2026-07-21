@@ -14,3 +14,21 @@ if (menuToggle && siteNav) {
     }
   });
 }
+
+if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+  let framePending = false;
+  let pointerX = 0;
+  let pointerY = 0;
+
+  window.addEventListener('pointermove', (event) => {
+    pointerX = (event.clientX / window.innerWidth - 0.5) * -18;
+    pointerY = (event.clientY / window.innerHeight - 0.5) * -12;
+    if (framePending) return;
+    framePending = true;
+    window.requestAnimationFrame(() => {
+      document.body.style.setProperty('--bg-x', pointerX.toFixed(2));
+      document.body.style.setProperty('--bg-y', pointerY.toFixed(2));
+      framePending = false;
+    });
+  });
+}
